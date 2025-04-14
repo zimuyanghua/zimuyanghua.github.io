@@ -4,9 +4,28 @@
   
   
   <entry>
+    <title>本地RTSP协议视频流实现公网播放</title>
+    <link href="/2025/04/14/index/"/>
+    <url>/2025/04/14/index/</url>
+    
+    <content type="html"><![CDATA[<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>RTSP是一种基于客户端-服务器模型的协议，允许客户端请求和控制流媒体的实时传输。主要应用场景包括视频会议，在线直播和监控系统等，本文详细写一下最近遇到的需求和解决办法。</p><p>甲方部署了视频监控，提供了视频流地址，让我们在web上加载显示，地址是<code>rtsp://192.168.1.154:554/channel=0&amp;stream=1</code>，显而易见这是一个本地地址，想要实现播放需要实现以下步骤:</p><h2 id="一、RTSP协议转换"><a href="#一、RTSP协议转换" class="headerlink" title="一、RTSP协议转换"></a>一、RTSP协议转换</h2><p>由于RTSP协议是不支持直接在Web上播放的，所以需要先转换为Web支持的格式，比如HLS或WebRTC。这里我选择转成WebRTC，转码是需要转换服务的，网上有很多方式，比如SRS(Simple Realtime Server)，Janus Gateway等等，这里我选择<a href="https://github.com/bluenviron/mediamtx">mediamtx</a>，mediamtx原生支持 RTSP、RTMP、HLS、WebRTC、SRT 等，并且WebRTC 传输延迟可控制在 0.3-1 秒，配置简单，只需要通过 YAML 文件快速定义流路由规则就可以实现。如下：</p><p>在mediamtx的GitHub的<a href="https://github.com/bluenviron/mediamtx/releases">Releases</a>页面下载系统对应的版本，由于我是使用windows服务器，所以选择如下图所示，下载解压到服务器任意目录。<br><img src="/img/image.png" alt="release"><br>解压后内部有3个文件，一份授权，一份exe文件和一份yml配置文件，在运行mediamtx的exe文件前需要先修改yml配置。<br><img src="/img/mediamtx.png" alt="mediamtx"><br>yml文件主要修改以下几个属性，默认<code>webrtc</code>是开启的，不用修改，<code>webrtcAddress</code>表示对外开放的TCP端口，<code>webrtcLocalUDPAddress</code>表示对外开放的UDP端口，<code>webrtcIPsFromInterfaces</code>表示是否自动获取本地IP，对于多网卡或虚拟网络需要关闭，并指定<code>webrtcAdditionalHosts</code>为公网IP，以下xx仅为示例，<code>webrtcICEServers2</code>用于用于解决网络穿透问题，确保端到端连接的建立，<code>Paths</code>下添加<code>my_camera</code>表示名称，可任意填写，<code>source</code>填写rtsp地址。</p><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-symbol">webrtc:</span>yes<br><span class="hljs-symbol">webrtcAddress:</span> :<span class="hljs-number">8889</span><br><span class="hljs-symbol">webrtcLocalUDPAddress:</span> :<span class="hljs-number">8189</span><br><span class="hljs-symbol">webrtcIPsFromInterfaces:</span> no<br><span class="hljs-symbol">webrtcAdditionalHosts:</span> [xxx.xx.xx.xx]<br><span class="hljs-symbol">webrtcICEServers2:</span> <br>  - url: stun:stun.l.google.com:<span class="hljs-number">19302</span><br><span class="hljs-symbol"></span><br><span class="hljs-symbol">paths:</span><br><span class="hljs-symbol">  my_camera:</span><br><span class="hljs-symbol">     source:</span> rtsp:<span class="hljs-comment">//192.168.1.154:554/channel=0&amp;stream=1</span><br><br></code></pre></td></tr></table></figure><p>配置修改完成后，双击<code>mediamtx.exe</code>运行，显示日志控制台可查看运行情况。</p><h2 id="二、公网访问"><a href="#二、公网访问" class="headerlink" title="二、公网访问"></a>二、公网访问</h2><p>实现公网访问主要需要将公网的8889和8189端口映射到内网上即可，此处省略。</p><h3 id="三、前端播放"><a href="#三、前端播放" class="headerlink" title="三、前端播放"></a>三、前端播放</h3><p>完成以上步骤后，打开浏览器输入<code>http://xxx.xx.xx.xx:8889/my_camera</code>即可看到播放视频，只需要将此地址使用<code>iframe</code>标签加载到Web页面上即可。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>技术</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Welcome</title>
-    <link href="/2024/07/29/first/"/>
-    <url>/2024/07/29/first/</url>
+    <link href="/2025/04/14/first/"/>
+    <url>/2025/04/14/first/</url>
     
     <content type="html"><![CDATA[<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>本项目是基于Hexo+Fluid开发的静态博客网站，详情见友链</p>]]></content>
     
